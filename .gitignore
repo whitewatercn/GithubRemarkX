@@ -3,3 +3,6 @@ node_modules
 
 # key
 *.pem
+
+# 打包文件
+.zip

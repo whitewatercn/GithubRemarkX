@@ -365,31 +365,7 @@ function changeRemarks(userToken, username, oldValue) {
 function showRemarks(userToken) {
 	showRemarkInLeftPannel(userToken);
 	showRemarkGlobally(userToken);
-	var tab = getCurrentTab();
-	switch (tab) {
-		case 'homepage':
-			showRemarkInHomepage(userToken);
-			break;
-		case 'repositories':
-			break;
-		case 'stars':
-			showRemarkInStarsTab(userToken);
-			break;
-		case 'following':
-		case 'followers':
-			showRemarkInFollowersTab(userToken);
-			break;
-        case 'orgs-members':
-            showRemarkInOrgMembers(userToken);
-            break;
-        case 'orgs-people':
-            showRemarkInOrgPeople(userToken);
-            break;
-		default:
-			showRemarkInRepoDetailPage(userToken);
-			break;
-	}
-	console.log(tab,'Show remarks')
+	console.log(getCurrentTab(),'Show remarks')
 }
 
 
