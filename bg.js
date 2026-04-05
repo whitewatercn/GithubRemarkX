@@ -33,17 +33,23 @@ var _remarksCache = null;
 function _getDavUrls(base) {
     if (!base) return { dir: '', file: '' };
     
-    base = base.trim();
-    if (base.endsWith('/')) {
-        base += 'github_remarks.json';
+    base = base.trim().replace(/\/+$/, '');
+    
+    var dirPath, fileUrl;
+    if (base.endsWith('.json') || base.endsWith('.txt')) {
+        var lastSlash = base.lastIndexOf('/');
+        dirPath = lastSlash !== -1 ? base.substring(0, lastSlash + 1) : base + '/';
+        fileUrl = base;
+    } else {
+        dirPath = base + '/';
+        var d = new Date();
+        var pad = function(n) { return n < 10 ? '0' + n : n; };
+        var dateStr = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + '-' + pad(d.getMinutes());
+        fileUrl = dirPath + dateStr + '-backup.json';
     }
     
-    var fileUrl = base;
-    var lastSlash = fileUrl.lastIndexOf('/');
-    var basePath = lastSlash !== -1 ? fileUrl.substring(0, lastSlash + 1) : fileUrl + '/';
-    
     return {
-        dir: basePath + 'githubremarkx-backup/',
+        dir: dirPath,
         file: fileUrl
     };
 }
