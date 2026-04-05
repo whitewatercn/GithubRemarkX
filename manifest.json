@@ -2,20 +2,26 @@
   "manifest_version": 3,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0IoOprpfKJ7Fuep0BrDZtGeGIgupg78Wm5Y3o10iAhUNC0oOUTp8V459aGLFtTWrgWOGqQvxTZ3dC3+RLvLYBcgWgUFPLgrRKmEc10NVV9WQ7dcM7/MIP+pZ2Vpak9MTo70+6naKua4OWtaBbrc+/SEEqDbou64w9TptZohnp6UgjwO1t/52OL2fB+1/kVqOUcUwJHunaIqy9xRnvDpYKQpupDK4bcWu9OCRMUjdHswylrNcRXjc3NdBxQSYOgXir09QtBEnczW8is2sE3PLJKKHUu+ng/3wbkWNAMAV3ySuO2NjomFvMpjqNbhzfNsvsFZDlw7vHvptpjg82oAe+wIDAQAB",
   "name": "__MSG_extName__",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "description": "__MSG_extDesc__",
   "default_locale": "zh_CN",
   "icons": {
     "128": "images/github_512.png"
   },
   "background": {
-    "service_worker": "bg.js",
+    "service_worker": "background.js",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["*://*.github.com/*"],
-      "js": ["i18n.js", "ghremark.js"],
+      "js": [
+        "i18n.js",
+        "content_scripts/api.js",
+        "content_scripts/utils.js",
+        "content_scripts/features.js",
+        "content_scripts/main.js"
+      ],
       "run_at": "document_idle"
     }
   ],
