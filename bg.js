@@ -1,3 +1,4 @@
+
 var GithubRemark = function (initParams) {
 	var _started = false,
 		_watchUrls = ['github.com'];
@@ -7,15 +8,7 @@ var GithubRemark = function (initParams) {
 	});
 
 	var _insertFunc = function (tabId, changeInfo, tab) {
-		if (changeInfo.status == 'loading' && !!changeInfo.url) {
-			var urlPattern = new RegExp("(" + _watchUrls.join('|') + ")");
-			if (urlPattern.test(tab.url)) {
-				chrome.scripting.executeScript({
-					target: { tabId: tabId },
-					files: ['webapi.js', 'ghremark.js']
-				});
-			}
-		}
+		// Do nothing, we use content_scripts in manifest.json now.
 	}
 
 	this.start = function () {
@@ -33,42 +26,8 @@ var GithubRemark = function (initParams) {
 	};
 }
 
-
-//init
-
 var gr = new GithubRemark();
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-	switch (message.method) {
-		case 'start':
-			gr.start();
-			sendResponse({ status: gr.isStart });
-			break;
-		case 'stop':
-			gr.stop();
-			sendResponse({ status: gr.isStart });
-			break;
-		// case 'getLocalStorage': 
-		// 	chrome.storage.local.get(message.key).then((result) => {
-		// 		console.log("Value is set to " + result[message.key]);
-		// 		sendResponse(result[message.key]);
-		// 	});
-		// 	break;
-		// case 'setLocalStorage': 
-		// 	chrome.storage.local.set({ [message.key] : message.value });
-		// 	break;
-	}
-
-});
-
-//恢复上次的状态
-chrome.storage.local.get("recordStatus").then((result) => {
-	if (result["recordStatus"] == "on") {
-		gr.start();
-		chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
-		chrome.action.setBadgeText({ text: 'on' });
-	}
-});
 var _remarksCache = null;
 
 function _getAuthHeaders(user, pass) {
@@ -79,6 +38,18 @@ function _getAuthHeaders(user, pass) {
 }
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+	if (message.method === 'start') {
+		gr.start();
+		sendResponse({ status: gr.isStart });
+		return false;
+	}
+	
+	if (message.method === 'stop') {
+		gr.stop();
+		sendResponse({ status: gr.isStart });
+		return false;
+	}
+
     if (message.method === 'updateRemark') {
         chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
             if (!res.webdavUrl || !res.webdavUser) {
@@ -111,7 +82,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 sendResponse({error: e.toString()});
             });
         });
-        return true; // Keep message channel open for async
+        return true; 
     }
     
     if (message.method === 'getRemark') {
@@ -138,11 +109,58 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 sendResponse({remark: null});
             });
         });
-        return true; // Keep message channel open
+        return true; 
     }
-});
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    if (message.method === 'getAllRemarks') {
+        chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
+            if (!res.webdavUrl || !res.webdavUser) {
+                sendResponse({remarks: _remarksCache || {}});
+                return;
+            }
+            fetch(res.webdavUrl, {
+                method: 'GET',
+                headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
+                cache: 'no-store'
+            })
+            .then(function(r) { return r.status === 404 ? {} : r.json(); })
+            .then(function(data) {
+                _remarksCache = data || {};
+                sendResponse({remarks: _remarksCache});
+            })
+            .catch(function(e) {
+                sendResponse({remarks: _remarksCache || {}});
+            });
+        });
+        return true;
+    }
+
+    if (message.method === 'updateAllRemarks') {
+        chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
+            if (!res.webdavUrl || !res.webdavUser) {
+                sendResponse({success: false, error: '未配置WebDAV'});
+                return;
+            }
+            fetch(res.webdavUrl, {
+                method: 'PUT',
+                headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
+                body: JSON.stringify(message.remarks, null, 2)
+            })
+            .then(function(putRes) {
+                if (putRes.ok) {
+                    _remarksCache = message.remarks;
+                    sendResponse({success: true});
+                } else {
+                    sendResponse({success: false, error: '上传失败 ' + putRes.status});
+                }
+            })
+            .catch(function(e) {
+                sendResponse({success: false, error: e.toString()});
+            });
+        });
+        return true;
+    }
+
     if (message.method === 'testWebDav') {
         var headers = {
             'Authorization': 'Basic ' + btoa(message.user + ':' + message.pass),
@@ -163,6 +181,9 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         .catch(function(err) {
             sendResponse({success: false, error: err.toString()});
         });
-        return true; // Keep channel open
+        return true;
     }
 });
+
+gr.start();
+

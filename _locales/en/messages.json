@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "GithubRemarkX",
+    "description": "Extension name"
+  },
+  "extDesc": {
+    "message": "Add remarks to your Github and support cloud sync",
+    "description": "Extension description"
+  }
+}

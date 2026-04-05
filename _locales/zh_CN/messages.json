@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "GithubRemarkX",
+    "description": "插件名称"
+  },
+  "extDesc": {
+    "message": "给你的Github设置备注，并且支持云端同步",
+    "description": "插件描述"
+  }
+}

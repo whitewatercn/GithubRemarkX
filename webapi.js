@@ -5,11 +5,11 @@ var webApi = {
             username: username,
             remark: remark
         }, function(response) {
-            if (response.error) {
+            if (!response || response.error) {
                 alert('WebDAV 同步失败: ' + response.error);
                 if (callback) callback(false);
             } else {
-                if (callback) callback(response.success);
+                if (callback) callback(response && response.success);
             }
         });
     },
@@ -19,7 +19,7 @@ var webApi = {
             method: 'getRemark',
             username: username
         }, function(response) {
-            if (callback) callback(response.remark || 'no remark');
+            if (callback) callback((response && response.remark) || 'no remark');
         });
     }
 };

@@ -54,20 +54,24 @@
         };
 
 
-        document.querySelector('#exportBtn').onclick = function () {
+document.querySelector('#exportBtn').onclick = function () {
                 var config = {
                         webdavUrl: document.querySelector('#webdavUrl').value,
                         webdavUser: document.querySelector('#webdavUser').value,
                         webdavPass: document.querySelector('#webdavPass').value
                 };
-                var jsonStr = JSON.stringify(config, null, 2);
-                var blob = new Blob([jsonStr], { type: "application/json" });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = "github_remark_config.json";
-                a.click();
-                URL.revokeObjectURL(url);
+
+                chrome.runtime.sendMessage({ method: 'getAllRemarks' }, function(response) {
+                        config.remarks = response.remarks || {};
+                        var jsonStr = JSON.stringify(config, null, 2);
+                        var blob = new Blob([jsonStr], { type: "application/json" });
+                        var url = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = "github_remark_config.json";
+                        a.click();
+                        URL.revokeObjectURL(url);
+                });
         };
 
         document.querySelector('#importBtn').onclick = function () {
@@ -86,7 +90,21 @@
                                         document.querySelector('#webdavUser').value = config.webdavUser || '';
                                         document.querySelector('#webdavPass').value = config.webdavPass || '';
                                         document.querySelector('#save').click();
-                                        alert('✅ 配置导入成功！');
+                                        
+                                        if (config.remarks && Object.keys(config.remarks).length > 0) {
+                                            chrome.runtime.sendMessage({
+                                                method: 'updateAllRemarks',
+                                                remarks: config.remarks
+                                            }, function(res) {
+                                                if(res.success) {
+                                                    alert('✅ 配置及 ' + Object.keys(config.remarks).length + ' 条备注导入成功！');
+                                                } else {
+                                                    alert('✅ 配置导入成功，但备注同步失败: ' + res.error);
+                                                }
+                                            });
+                                        } else {
+                                            alert('✅ 配置导入成功！(无备注数据)');
+                                        }
                                 } else {
                                         alert('❌ 导入失败，请检查是否为正确的 JSON 配置文件！');
                                 }
