@@ -32,10 +32,19 @@ var _remarksCache = null;
 
 function _getDavUrls(base) {
     if (!base) return { dir: '', file: '' };
-    var url = base.replace(/\/+$/, '') + '/';
+    
+    base = base.trim();
+    if (base.endsWith('/')) {
+        base += 'github_remarks.json';
+    }
+    
+    var fileUrl = base;
+    var lastSlash = fileUrl.lastIndexOf('/');
+    var basePath = lastSlash !== -1 ? fileUrl.substring(0, lastSlash + 1) : fileUrl + '/';
+    
     return {
-        dir: url + 'githubremarkx-backup/',
-        file: url + 'githubremarkx-backup/remarks.json'
+        dir: basePath + 'githubremarkx-backup/',
+        file: fileUrl
     };
 }
 
@@ -81,6 +90,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             .then(function(r) { return r.status === 404 ? {} : r.json(); })
             .catch(function() { return _remarksCache || {}; })
             .then(function(data) {
+                if (data && data.remarks && typeof data.remarks === 'object' && ("webdavUrl" in data)) {
+                    data = data.remarks;
+                }
                 data[message.username] = message.remark;
                 return _ensureDavFolder(urls, headers).then(function() {
                     return fetch(urls.file, {
@@ -122,6 +134,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             })
             .then(function(r) { return r.status === 404 ? {} : r.json(); })
             .then(function(data) {
+                if (data && data.remarks && typeof data.remarks === 'object' && ("webdavUrl" in data)) {
+                    data = data.remarks;
+                }
                 _remarksCache = data || {};
                 sendResponse({remark: _remarksCache[message.username]});
             })
@@ -146,6 +161,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             })
             .then(function(r) { return r.status === 404 ? {} : r.json(); })
             .then(function(data) {
+                if (data && data.remarks && typeof data.remarks === 'object' && ("webdavUrl" in data)) {
+                    data = data.remarks;
+                }
                 _remarksCache = data || {};
                 sendResponse({remarks: _remarksCache});
             })
@@ -242,6 +260,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
+                if (data && data.remarks && typeof data.remarks === 'object' && ("webdavUrl" in data)) {
+                    data = data.remarks;
+                }
                 _remarksCache = data;
                 return fetch(urls.file, {
                     method: 'PUT',

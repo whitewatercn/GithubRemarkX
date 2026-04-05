@@ -81,14 +81,21 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	document.getElementById('exportLocal').onclick = function() {
 		chrome.runtime.sendMessage({ method: 'getAllRemarks' }, function(response) {
-			var remarks = response.remarks || {};
-			var blob = new Blob([JSON.stringify(remarks, null, 2)], { type: 'application/json' });
-			var url = URL.createObjectURL(blob);
-			var a = document.createElement('a');
-			a.href = url;
-			a.download = 'github_remarks_export.json';
-			a.click();
-			URL.revokeObjectURL(url);
+			chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
+				var exportData = {
+					webdavUrl: res.webdavUrl || '',
+					webdavUser: res.webdavUser || '',
+					webdavPass: res.webdavPass || '',
+					remarks: response.remarks || {}
+				};
+				var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+				var url = URL.createObjectURL(blob);
+				var a = document.createElement('a');
+				a.href = url;
+				a.download = 'github_remarks_export.json';
+				a.click();
+				URL.revokeObjectURL(url);
+			});
 		});
 	};
 
@@ -105,9 +112,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 		reader.onload = function(evt) {
 			try {
 				var data = JSON.parse(evt.target.result);
-				chrome.runtime.sendMessage({ method: 'updateAllRemarks', remarks: data }, function(res) {
+				var remarksToUpdate = data.remarks ? data.remarks : data;
+				if (data.webdavUrl || data.webdavUser) {
+					chrome.storage.local.set({
+						webdavUrl: data.webdavUrl || '',
+						webdavUser: data.webdavUser || '',
+						webdavPass: data.webdavPass || ''
+					});
+				}
+				chrome.runtime.sendMessage({ method: 'updateAllRemarks', remarks: remarksToUpdate }, function(res) {
 					if (res && res.success) {
-						alert(I18N.getMessage('importUploadSuccess', [Object.keys(data).length]));
+						alert(I18N.getMessage('importUploadSuccess', [Object.keys(remarksToUpdate).length]));
 					} else {
 						alert(I18N.getMessage('importSuccessUploadFailed', [res ? (res.error && res.error.startsWith('uploadFailedStatus|') ? I18N.getMessage('uploadFailedStatus', [res.error.split('|')[1]]) : (res.error === 'notConfigured' ? I18N.getMessage('notConfigured') : (res.error ? res.error : I18N.getMessage('unknownError')))) : I18N.getMessage('unknownError')]));
 					}
