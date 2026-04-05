@@ -164,8 +164,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }
             var urls = _getDavUrls(res.webdavUrl);
             var headers = _getAuthHeaders(res.webdavUser, res.webdavPass);
+            var d = new Date();
+            var pad = function(n) { return n < 10 ? '0'+n : n; };
+            var ts = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + '-' + pad(d.getMinutes());
+            var backupFile = urls.dir + ts + '-backup.json';
+            
             _ensureDavFolder(urls, headers).then(function() {
-                return fetch(urls.file, {
+                return fetch(backupFile, {
                     method: 'PUT',
                     headers: headers,
                     body: JSON.stringify(message.remarks, null, 2)
@@ -174,10 +179,77 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             .then(function(putRes) {
                 if (putRes.ok) {
                     _remarksCache = message.remarks;
-                    sendResponse({success: true});
+                    return fetch(urls.file, {
+                        method: 'PUT',
+                        headers: headers,
+                        body: JSON.stringify(message.remarks, null, 2)
+                    }).then(function() {
+                        sendResponse({success: true});
+                    });
                 } else {
                     sendResponse({success: false, error: 'uploadFailedStatus|' + putRes.status});
                 }
+            })
+            .catch(function(e) {
+                sendResponse({success: false, error: e.toString()});
+            });
+        });
+        return true;
+    }
+
+    if (message.method === 'listWebDavFiles') {
+        chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
+            var urls = _getDavUrls(res.webdavUrl);
+            var headers = _getAuthHeaders(res.webdavUser, res.webdavPass);
+            headers['Depth'] = '1';
+            fetch(urls.dir, {
+                method: 'PROPFIND',
+                headers: headers
+            })
+            .then(function(r) { return r.text(); })
+            .then(function(text) {
+                var files = [];
+                var regex = /<([^:>]+:)?displayname>([^<]+\\.json)<\/\\1displayname>/gi;
+                var match;
+                while ((match = regex.exec(text)) !== null) {
+                    files.push(match[2]);
+                }
+                if (files.length === 0) {
+                    var hrefReg = /<([^:>]+:)?href>([^<]+\\.json)<\/\\1href>/gi;
+                    while ((match = hrefReg.exec(text)) !== null) {
+                        var parts = match[2].split('/');
+                        files.push(decodeURIComponent(parts[parts.length - 1]));
+                    }
+                }
+                files = [...new Set(files)].sort().reverse();
+                sendResponse({success: true, files: files});
+            })
+            .catch(function(err) {
+                sendResponse({success: false, error: err.toString()});
+            });
+        });
+        return true;
+    }
+
+    if (message.method === 'restoreBackup') {
+        chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
+            var urls = _getDavUrls(res.webdavUrl);
+            var headers = _getAuthHeaders(res.webdavUser, res.webdavPass);
+            fetch(urls.dir + message.file, {
+                method: 'GET',
+                headers: headers,
+                cache: 'no-store'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                _remarksCache = data;
+                return fetch(urls.file, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify(data, null, 2)
+                }).then(function() {
+                    sendResponse({success: true, count: Object.keys(data).length});
+                });
             })
             .catch(function(e) {
                 sendResponse({success: false, error: e.toString()});

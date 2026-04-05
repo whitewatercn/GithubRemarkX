@@ -9,8 +9,8 @@ const I18N = {
             chrome.storage.local.get(['userLocale'], async (result) => {
                 let userLocale = result.userLocale;
                 if (!userLocale) {
-                    let browserLang = navigator.language.split('-')[0];
-                    userLocale = (browserLang === 'zh') ? 'zh_CN' : 'en';
+                    let uiLang = chrome.i18n.getUILanguage();
+                    userLocale = uiLang.startsWith('zh') ? 'zh_CN' : 'en';
                 }
                 if (!this.supportedLocales.includes(userLocale)) {
                     userLocale = this.defaultLocale;

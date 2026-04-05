@@ -56,5 +56,11 @@
   
   "notConfigured": { "message": "未配置WebDAV" },
   "uploadFailedStatus": { "message": "上传失败 $1" },
-  "unknownError": { "message": "未知错误" }
+  "unknownError": { "message": "未知错误" },
+
+  "restoreBackupLabel": { "message": "恢复选定备份" },
+  "cancelBtn": { "message": "取消" },
+  "restoreSuccess": { "message": "恢复成功！共下载 $1 条备注" },
+  "restoreFailed": { "message": "恢复失败: $1" },
+  "backupNotFound": { "message": "未找到备份文件或列表获取失败: $1" }
 }

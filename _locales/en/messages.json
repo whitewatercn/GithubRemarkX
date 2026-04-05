@@ -50,5 +50,11 @@
   
   "notConfigured": { "message": "WebDAV not configured" },
   "uploadFailedStatus": { "message": "Upload failed $1" },
-  "unknownError": { "message": "Unknown error" }
+  "unknownError": { "message": "Unknown error" },
+
+  "restoreBackupLabel": { "message": "Restore selected backup" },
+  "cancelBtn": { "message": "Cancel" },
+  "restoreSuccess": { "message": "Restore successful! Downloaded $1 remarks" },
+  "restoreFailed": { "message": "Restore failed: $1" },
+  "backupNotFound": { "message": "Backup files not found or list fetch failed: $1" }
 }
