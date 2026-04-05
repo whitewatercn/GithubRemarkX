@@ -1,4 +1,14 @@
-(function () {
+(async function () {
+    await I18N.init();
+
+    var btnToggleLang = document.getElementById('toggleLang');
+    if (btnToggleLang) {
+        btnToggleLang.onclick = function() {
+            var newLang = I18N.currentLocale === 'zh_CN' ? 'en' : 'zh_CN';
+            I18N.setLocale(newLang);
+        }
+    }
+
 	chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(result) {
 		if (result.webdavUrl) document.querySelector('#webdavUrl').value = result.webdavUrl;
 		if (result.webdavUser) document.querySelector('#webdavUser').value = result.webdavUser;
@@ -28,12 +38,12 @@
                 var pass = document.querySelector('#webdavPass').value;
 
                 if (!url || !user || !pass) {
-                        alert("请先填写完整的 WebDAV URL、账号和密码");
+                        alert(I18N.getMessage('fillCompleteInfo'));
                         return;
                 }
 
                 var status = document.querySelector('#testStatus');
-                status.textContent = '测试中...';
+                status.textContent = I18N.getMessage('testingConn');
                 status.style.color = '#31708f';
                 status.style.display = 'inline';
 
@@ -44,10 +54,10 @@
                         pass: pass
                 }, function(response) {
                         if (response.success) {
-                                status.textContent = '连接成功！';
+                                status.textContent = I18N.getMessage('connSuccess');
                                 status.style.color = '#3c763d';
                         } else {
-                                status.textContent = '连接失败: ' + (response.error || '未知错误');
+                                status.textContent = I18N.getMessage('connFailed', [(response.error || I18N.getMessage('unknownError'))]);
                                 status.style.color = '#a94442';
                         }
                 });
@@ -97,19 +107,19 @@ document.querySelector('#exportBtn').onclick = function () {
                                                 remarks: config.remarks
                                             }, function(res) {
                                                 if(res.success) {
-                                                    alert('✅ 配置及 ' + Object.keys(config.remarks).length + ' 条备注导入成功！');
+                                                    alert(I18N.getMessage('importAllSuccess', [Object.keys(config.remarks).length]));
                                                 } else {
-                                                    alert('✅ 配置导入成功，但备注同步失败: ' + res.error);
+                                                    alert(I18N.getMessage('importConfigSuccessUploadFailed', [res.error && res.error.startsWith('uploadFailedStatus|') ? I18N.getMessage('uploadFailedStatus', [res.error.split('|')[1]]) : (res.error === 'notConfigured' ? I18N.getMessage('notConfigured') : res.error)]));
                                                 }
                                             });
                                         } else {
-                                            alert('✅ 配置导入成功！(无备注数据)');
+                                            alert(I18N.getMessage('importConfigSuccessNoData'));
                                         }
                                 } else {
-                                        alert('❌ 导入失败，请检查是否为正确的 JSON 配置文件！');
+                                        alert(I18N.getMessage('importFailedNotJson'));
                                 }
                         } catch (err) {
-                                alert('❌ 解析失败: ' + err.message);
+                                alert(I18N.getMessage('parseFailed', [err.message]));
                         }
                 };
                 reader.readAsText(file);
@@ -117,4 +127,3 @@ document.querySelector('#exportBtn').onclick = function () {
         };
 
 })();
-

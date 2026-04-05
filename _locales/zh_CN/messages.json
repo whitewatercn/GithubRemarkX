@@ -6,5 +6,55 @@
   "extDesc": {
     "message": "给你的Github设置备注，并且支持云端同步",
     "description": "插件描述"
-  }
+  },
+  "openWebdavSettings": { "message": "打开WebDAV设置" },
+  "uploadToWebdav": { "message": "上传至WebDAV" },
+  "downloadFromWebdav": { "message": "从WebDAV下载" },
+  "exportToLocal": { "message": "导出到本地" },
+  "importFromLocal": { "message": "从本地导入" },
+  "language": { "message": "语言 / Language" },
+
+  "settingsTitle": { "message": "Github 备注配置" },
+  "settingsSubtitle": { "message": "给你的github好友添加备注吧～" },
+  "webdavUrlLabel": { "message": "WebDAV 地址" },
+  "webdavUrlPlaceholder": { "message": "例如: https://dav.jianguoyun.com/dav/github_remarks.json" },
+  "webdavUserLabel": { "message": "WebDAV 账号" },
+  "webdavUserPlaceholder": { "message": "你的账号" },
+  "webdavPassLabel": { "message": "WebDAV 密码" },
+  "webdavPassPlaceholder": { "message": "应用授权密码" },
+  "saveConfig": { "message": "保存配置" },
+  "testConnection": { "message": "测试连接" },
+  "saveSuccess": { "message": "保存成功！" },
+  "localConfigData": { "message": "本地配置管理" },
+  "exportJson": { "message": "导出配置 (JSON)" },
+  "importJson": { "message": "导入配置 (JSON)" },
+
+  "updateFailed": { "message": "更新失败！" },
+  "remarkLabel": { "message": "（备注：$1）" },
+  "doubleClickToEdit": { "message": "双击修改备注" },
+  "inputRemarkPlaceholder": { "message": "在此添加备注... (Enter保存)" },
+  "inputNewRemarkPrompt": { "message": "请输入新备注" },
+  "notLoggedIn": { "message": "你还未登陆github，请先登录你的github账户！" },
+
+  "uploadSuccess": { "message": "上传成功！" },
+  "uploadFailed": { "message": "上传失败: $1" },
+  "downloadSuccess": { "message": "下载成功，共获取到 $1 条备注" },
+  "downloadFailed": { "message": "下载失败或无数据" },
+  "importUploadSuccess": { "message": "导入并上传成功！共导入 $1 条备注" },
+  "importSuccessUploadFailed": { "message": "导入成功但上传失败: $1" },
+  "jsonFormatError": { "message": "JSON 文件格式错误！" },
+
+  "fillCompleteInfo": { "message": "请先填写完整的 WebDAV URL、账号和密码" },
+  "testingConn": { "message": "测试中..." },
+  "connSuccess": { "message": "连接成功！" },
+  "connFailed": { "message": "连接失败: $1" },
+  "importAllSuccess": { "message": "✅ 配置及 $1 条备注导入成功！" },
+  "importConfigSuccessUploadFailed": { "message": "✅ 配置导入成功，但备注同步失败: $1" },
+  "importConfigSuccessNoData": { "message": "✅ 配置导入成功！(无备注数据)" },
+  "importFailedNotJson": { "message": "❌ 导入失败，请检查是否为正确的 JSON 配置文件！" },
+  "parseFailed": { "message": "❌ 解析失败: $1" },
+  
+  "notConfigured": { "message": "未配置WebDAV" },
+  "uploadFailedStatus": { "message": "上传失败 $1" },
+  "unknownError": { "message": "未知错误" }
 }

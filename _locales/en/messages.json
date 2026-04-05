@@ -1,10 +1,54 @@
 {
-  "extName": {
-    "message": "GithubRemarkX",
-    "description": "Extension name"
-  },
-  "extDesc": {
-    "message": "Add remarks to your Github and support cloud sync",
-    "description": "Extension description"
-  }
+  "extName": { "message": "GithubRemarkX" },
+  "extDesc": { "message": "Add remarks to GitHub users with cloud sync" },
+  "openWebdavSettings": { "message": "Open WebDAV Settings" },
+  "uploadToWebdav": { "message": "Upload to WebDAV" },
+  "downloadFromWebdav": { "message": "Download from WebDAV" },
+  "exportToLocal": { "message": "Export to local" },
+  "importFromLocal": { "message": "Import from local" },
+  "language": { "message": "Language / 语言" },
+
+  "settingsTitle": { "message": "Github Remark Config" },
+  "settingsSubtitle": { "message": "Add remark to your github friends~" },
+  "webdavUrlLabel": { "message": "WebDAV URL" },
+  "webdavUrlPlaceholder": { "message": "e.g., https://dav.jianguoyun.com/dav/github_remarks.json" },
+  "webdavUserLabel": { "message": "WebDAV User" },
+  "webdavUserPlaceholder": { "message": "Username" },
+  "webdavPassLabel": { "message": "WebDAV Pass" },
+  "webdavPassPlaceholder": { "message": "App Password" },
+  "saveConfig": { "message": "Save Config" },
+  "testConnection": { "message": "Test Connection" },
+  "saveSuccess": { "message": "Saved successfully!" },
+  "localConfigData": { "message": "Local Config Data" },
+  "exportJson": { "message": "Export Config (JSON)" },
+  "importJson": { "message": "Import Config (JSON)" },
+
+  "updateFailed": { "message": "Update failed!" },
+  "remarkLabel": { "message": "(Remark: $1)" },
+  "doubleClickToEdit": { "message": "Double click to edit" },
+  "inputRemarkPlaceholder": { "message": "Add remark... (Enter to save)" },
+  "inputNewRemarkPrompt": { "message": "Input new remark" },
+  "notLoggedIn": { "message": "You haven't logged in to Github. Please login first!" },
+
+  "uploadSuccess": { "message": "Uploaded successfully!" },
+  "uploadFailed": { "message": "Upload failed: $1" },
+  "downloadSuccess": { "message": "Downloaded successfully. Got $1 remarks." },
+  "downloadFailed": { "message": "Download failed or no data." },
+  "importUploadSuccess": { "message": "Imported and uploaded! Total $1 remarks." },
+  "importSuccessUploadFailed": { "message": "Imported but upload failed: $1" },
+  "jsonFormatError": { "message": "JSON format error!" },
+
+  "fillCompleteInfo": { "message": "Please configure WebDAV URL, User and Password first." },
+  "testingConn": { "message": "Testing..." },
+  "connSuccess": { "message": "Connection successful!" },
+  "connFailed": { "message": "Connection failed: $1" },
+  "importAllSuccess": { "message": "✅ Configuration and $1 remarks imported!" },
+  "importConfigSuccessUploadFailed": { "message": "✅ Config imported, but remark sync failed: $1" },
+  "importConfigSuccessNoData": { "message": "✅ Config imported! (No remark data)" },
+  "importFailedNotJson": { "message": "❌ Import failed. Not a valid JSON config file!" },
+  "parseFailed": { "message": "❌ Parsing failed: $1" },
+  
+  "notConfigured": { "message": "WebDAV not configured" },
+  "uploadFailedStatus": { "message": "Upload failed $1" },
+  "unknownError": { "message": "Unknown error" }
 }

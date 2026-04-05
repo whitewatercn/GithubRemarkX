@@ -3,7 +3,7 @@ function updateRemark(userToken, username, remark) {
 		if (success)
 			showRemarks(userToken);
 		else
-			alert('更新失败！');
+			alert(I18N.getMessage('updateFailed'));
 	});
 }
 
@@ -82,15 +82,15 @@ function showRemarkGlobally(userToken) {
                                 remarkEl.style.color = 'red';
                                 remarkEl.style.marginLeft = '4px';
                                 remarkEl.style.fontWeight = 'bold';
-                                remarkEl.textContent = '（备注：' + remark + '）';
-                                remarkEl.title = '（备注：' + remark + '）';
+                                remarkEl.textContent = I18N.getMessage('remarkLabel', [remark]);
+                                remarkEl.title = I18N.getMessage('remarkLabel', [remark]);
 
                                 remarkEl.addEventListener('dblclick', function (event) {
                                         event.preventDefault();
                                         var newRemark = changeRemarks(userToken, username, remark);
                                         if (newRemark && newRemark !== remark) {
-                                                remarkEl.textContent = '（备注：' + newRemark + '）';
-                                                remarkEl.title = '（备注：' + newRemark + '）';
+                                                remarkEl.textContent = I18N.getMessage('remarkLabel', [newRemark]);
+                                                remarkEl.title = I18N.getMessage('remarkLabel', [newRemark]);
                                                 remark = newRemark;
                                         }
                                 }, false);
@@ -191,15 +191,15 @@ function showRemarkInLeftPannel(userToken) {
                                 nameRemarkSpan.style.color = '#d73a49';
                                 nameRemarkSpan.style.fontSize = '16px';
                                 nameRemarkSpan.style.fontWeight = 'bold';
-                                nameRemarkSpan.textContent = '（备注：' + remark + '）';
-                                nameRemarkSpan.title = '双击修改备注';
+                                nameRemarkSpan.textContent = I18N.getMessage('remarkLabel', [remark]);
+                                nameRemarkSpan.title = I18N.getMessage('doubleClickToEdit');
                                 nameRemarkSpan.style.cursor = 'pointer';
 
                                 nameRemarkSpan.addEventListener('dblclick', function(e) {
                                         e.preventDefault();
                                         var newRemark = changeRemarks(userToken, username, remark);
                                         if (newRemark && newRemark !== remark) {
-                                                nameRemarkSpan.textContent = '（备注：' + newRemark + '）';
+                                                nameRemarkSpan.textContent = I18N.getMessage('remarkLabel', [newRemark]);
                                                 remark = newRemark;
                                         }
                                 });
@@ -209,7 +209,7 @@ function showRemarkInLeftPannel(userToken) {
                                 var inputBox = document.createElement('input');
                                 inputBox.type = 'text';
                                 inputBox.className = 'form-control github-profile-remark-box';
-                                inputBox.placeholder = '在此添加备注... (Enter保存)';
+                                inputBox.placeholder = I18N.getMessage('inputRemarkPlaceholder');
                                 inputBox.style.width = '180px';
                                 inputBox.style.padding = '2px 8px';
                                 inputBox.style.fontSize = '12px';
@@ -231,14 +231,14 @@ function showRemarkInLeftPannel(userToken) {
                                                 n.style.color = '#d73a49';
                                                 n.style.fontSize = '16px';
                                                 n.style.fontWeight = 'bold';
-                                                n.textContent = '（备注：' + newRemark + '）';
-                                                n.title = '双击修改备注';
+                                                n.textContent = I18N.getMessage('remarkLabel', [newRemark]);
+                                                n.title = I18N.getMessage('doubleClickToEdit');
                                                 n.style.cursor = 'pointer';
                                                 n.addEventListener('dblclick', function(e) {
                                                         e.preventDefault();
                                                         var r = changeRemarks(userToken, username, newRemark);
                                                         if (r && r !== newRemark) {
-                                                                n.textContent = '（备注：' + r + '）';
+                                                                n.textContent = I18N.getMessage('remarkLabel', [r]);
                                                                 newRemark = r;
                                                         }
                                                 });
@@ -339,7 +339,7 @@ function showRemarkInOrgMembers(userToken){
 }
 
 function changeRemarks(userToken, username, oldValue) {
-	var newValue = window.prompt("请输入新备注", oldValue);
+	var newValue = window.prompt(I18N.getMessage('inputNewRemarkPrompt'), oldValue);
 	if (newValue !== null && newValue !== oldValue) {
 		updateRemark(userToken, username, newValue);
         return newValue;
@@ -378,12 +378,13 @@ function showRemarks(userToken) {
 }
 
 
-(function () {
+(async function () {
 	console.log('inject');
+    await I18N.init();
 	var username = getGithubLoginUsername();
 	if (username !== null && username != '') {
 		showRemarks(username);
 	} else if (hasLoginFrame()) {
-		alert('你还未登陆github，请先登录你的github账户！');
+		alert(I18N.getMessage('notLoggedIn'));
 	}
 }());

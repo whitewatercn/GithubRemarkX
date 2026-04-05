@@ -30,6 +30,21 @@ var gr = new GithubRemark();
 
 var _remarksCache = null;
 
+function _getDavUrls(base) {
+    if (!base) return { dir: '', file: '' };
+    var url = base.replace(/\/+$/, '') + '/';
+    return {
+        dir: url + 'githubremarkx-backup/',
+        file: url + 'githubremarkx-backup/remarks.json'
+    };
+}
+
+function _ensureDavFolder(urls, headers) {
+    return fetch(urls.dir, { method: 'MKCOL', headers: headers })
+        .then(function(res) { return res; })
+        .catch(function() { return {}; }); // Ignore error
+}
+
 function _getAuthHeaders(user, pass) {
     return {
         'Authorization': 'Basic ' + btoa(user + ':' + pass),
@@ -53,28 +68,32 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.method === 'updateRemark') {
         chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
             if (!res.webdavUrl || !res.webdavUser) {
-                sendResponse({error: "未配置WebDAV"});
+                sendResponse({error: "notConfigured"});
                 return;
             }
-            fetch(res.webdavUrl, {
+            var urls = _getDavUrls(res.webdavUrl);
+            var headers = _getAuthHeaders(res.webdavUser, res.webdavPass);
+            fetch(urls.file, {
                 method: 'GET',
-                headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
+                headers: headers,
                 cache: 'no-store'
             })
             .then(function(r) { return r.status === 404 ? {} : r.json(); })
             .catch(function() { return _remarksCache || {}; })
             .then(function(data) {
                 data[message.username] = message.remark;
-                return fetch(res.webdavUrl, {
-                    method: 'PUT',
-                    headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
-                    body: JSON.stringify(data, null, 2)
+                return _ensureDavFolder(urls, headers).then(function() {
+                    return fetch(urls.file, {
+                        method: 'PUT',
+                        headers: headers,
+                        body: JSON.stringify(data, null, 2)
+                    });
                 }).then(function(putRes) {
                     if (putRes.ok) {
                         _remarksCache = data;
                         sendResponse({success: true});
                     } else {
-                        sendResponse({error: "上传失败 " + putRes.status});
+                        sendResponse({error: "uploadFailedStatus|" + putRes.status});
                     }
                 });
             })
@@ -95,7 +114,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 sendResponse({remark: null});
                 return;
             }
-            fetch(res.webdavUrl, {
+            var urls = _getDavUrls(res.webdavUrl);
+            fetch(urls.file, {
                 method: 'GET',
                 headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
                 cache: 'no-store'
@@ -118,7 +138,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 sendResponse({remarks: _remarksCache || {}});
                 return;
             }
-            fetch(res.webdavUrl, {
+            var urls = _getDavUrls(res.webdavUrl);
+            fetch(urls.file, {
                 method: 'GET',
                 headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
                 cache: 'no-store'
@@ -138,20 +159,24 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (message.method === 'updateAllRemarks') {
         chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
             if (!res.webdavUrl || !res.webdavUser) {
-                sendResponse({success: false, error: '未配置WebDAV'});
+                sendResponse({success: false, error: 'notConfigured'});
                 return;
             }
-            fetch(res.webdavUrl, {
-                method: 'PUT',
-                headers: _getAuthHeaders(res.webdavUser, res.webdavPass),
-                body: JSON.stringify(message.remarks, null, 2)
+            var urls = _getDavUrls(res.webdavUrl);
+            var headers = _getAuthHeaders(res.webdavUser, res.webdavPass);
+            _ensureDavFolder(urls, headers).then(function() {
+                return fetch(urls.file, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify(message.remarks, null, 2)
+                });
             })
             .then(function(putRes) {
                 if (putRes.ok) {
                     _remarksCache = message.remarks;
                     sendResponse({success: true});
                 } else {
-                    sendResponse({success: false, error: '上传失败 ' + putRes.status});
+                    sendResponse({success: false, error: 'uploadFailedStatus|' + putRes.status});
                 }
             })
             .catch(function(e) {
