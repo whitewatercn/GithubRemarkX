@@ -18,12 +18,14 @@ function getRemark(userToken, username, callback) {
  */
 
  function getGithubLoginUsername() {
-	var doc = document.querySelector("head > meta[name*='login']");
+	var doc = document.querySelector("meta[name='user-login']");
+	if (doc && doc.content) return doc.content;
+	doc = document.querySelector("meta[name='octolytics-dimension-user_login']");
 	return doc == null ? null : doc.content;
 }
 
 function hasLoginFrame() {
-	var loginBtn = document.querySelector('div[class*=HeaderMenu] a[href*=login]');
+	var loginBtn = document.querySelector('a[href^="/login"]');
 	return loginBtn != null;
 }
 
@@ -85,17 +87,25 @@ function clearRemarkOfCurrentNode(div){
  */
 
 function showRemarkInHomepage(userToken) {
-	var news = document.querySelector("#dashboard > div.news");
-	var userCount = document.querySelectorAll("div.flex-items-baseline > div > a[data-hovercard-type=user]").length;
+	var news = document.querySelector("#dashboard");
+	if (!news) news = document.body;
+	
+	var getUserList = function() {
+		return document.querySelectorAll("a[data-hovercard-type='user'], a[data-hovercard-url*='/hovercards?user_id=']");
+	};
+	var userCount = getUserList().length;
+	
 	var observer = new MutationObserver(function (mutations, self) {
-		var users = document.querySelectorAll("div.flex-items-baseline > div > a[data-hovercard-type=user]");
+		var users = getUserList();
 		if (userCount != users.length) {
-			userCount = users.length
+			userCount = users.length;
 			users.forEach(function (element) {
-                clearRemarkOfCurrentNode(element.parentNode);
+				if(element.querySelector('img') || element.childElementCount > 0 && !element.textContent.trim()) return; // skip avatar links
+				clearRemarkOfCurrentNode(element.parentNode);
 				var username = getMasterOfPage(element.href);
+				if (!username) return;
 				getRemark(userToken, username, function (remark) {
-                    var remarkEl = generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark);
+					var remarkEl = generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark);
 					insertAfter(remarkEl, element);
 				});
 			}, this);
@@ -105,10 +115,10 @@ function showRemarkInHomepage(userToken) {
 }
 
 function showRemarkInLeftPannel(userToken) {
-	var vcard = document.querySelector('h1.vcard-names');//author in home page
+	var vcard = document.querySelector('.vcard-names'); //author in home page
 	if (!!vcard) {
 		if (vcard.childElementCount > 2)
-			vcard.removeChild(vcard.querySelector('span.github-remarks'));
+			clearRemarkOfCurrentNode(vcard);
 		var username = getMasterOfPage(location.href);
 		getRemark(userToken, username, function (remark) {
 			vcard.appendChild(generateRemarkSpan('vcard-username d-block github-remarks', userToken, username, remark));
@@ -117,13 +127,14 @@ function showRemarkInLeftPannel(userToken) {
 }
 
 function showRemarkInStarsTab(userToken) {
-	var stars = document.querySelectorAll('div > h3 > a');//in star page
+	var stars = document.querySelectorAll('h3 a[data-hovercard-type="repository"]'); //in star page
 	if (stars !== null) {
 		stars.forEach(function (element) {
-            clearRemarkOfCurrentNode(element.parentNode);
-			if (!!element.querySelector('span.text-normal')) {
-				var text = element.querySelector('span.text-normal').textContent;
-				var username = text.substring(0, text.indexOf(' /'));
+			clearRemarkOfCurrentNode(element.parentNode);
+			var textContainer = element.textContent.trim();
+			var sIdx = textContainer.indexOf('/');
+			if (sIdx > -1) {
+				var username = textContainer.substring(0, sIdx).trim();
 				getRemark(userToken, username, function (remark) {
 					insertAfter(generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark), element);
 				});
@@ -133,11 +144,13 @@ function showRemarkInStarsTab(userToken) {
 }
 
 function showRemarkInFollowersTab(userToken) {
-	var followers = document.querySelectorAll('div.d-table > div:nth-child(2) > a');//in followers/following page
+	var followers = document.querySelectorAll('a[data-hovercard-type="user"]');
 	if (!!followers) {
 		followers.forEach(function (element) {
+			if (element.querySelector('img') || (element.childElementCount > 0 && !element.textContent.trim())) return;
 			clearRemarkOfCurrentNode(element.parentNode);
-			var username = element.querySelector('span:last-child').textContent;
+			var username = getMasterOfPage(element.href);
+			if(!username) return;
 			getRemark(userToken, username, function (remark) {
 				insertAfter(generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark), element);
 			});
@@ -146,70 +159,52 @@ function showRemarkInFollowersTab(userToken) {
 }
 
 function showRemarkInRepoStargazersPage(userToken) {
-	var stargazers = document.querySelectorAll('div > h3 > span');
+	var stargazers = document.querySelectorAll('h3 span a, h3 a[data-hovercard-type="user"]');
 	if (!!stargazers) {
 		stargazers.forEach(function (element) {
-            clearRemarkOfCurrentNode(element.parentNode);
-            var a = element.querySelector('a');
-			var username = getMasterOfPage(a.href);
+			clearRemarkOfCurrentNode(element.parentNode);
+			var username = getMasterOfPage(element.href);
+			if(!username) return;
 			getRemark(userToken, username, function (remark) {
 				var remarkEl = generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark)
-				insertAfter(remarkEl, a);
-				//如果username太长，截断显示，为remark留点位置
-				if (a.offsetWidth > element.clientWidth * 4 / 5) {
-					a.style.width = element.clientWidth * 4 / 5 + 'px';
-					a.className += 'css-truncate-target';
-					remarkEl.style.width = element.clientWidth * 1 / 5 + 'px';
-					remarkEl.className += 'css-truncate-target';
-				}
+				insertAfter(remarkEl, element);
 			});
 		}, this);
 	}
 }
 
 function showRemarkInRepoDetailPage(userToken) {
-	var author = document.querySelector('span.author > a');//in a repo page
+	var author = document.querySelector('span.author > a, a.author'); //in a repo page
 	if (!!author) {
 		var username = getMasterOfPage(location.href);
+		if(!username || username === 'login') return;
 		getRemark(userToken, username, function (remark) {
 			author.textContent = username + '(' + remark + ')';
 		});
 	}
 	var repoDetail = /\/(stargazers|watchers)(\/you_know)?$/.exec(location.href);
 	if (repoDetail !== null) {
-		switch (repoDetail[1]) {
-			case 'watchers':
-			case 'stargazers':
-				showRemarkInRepoStargazersPage(userToken);
-				break;
-		}
+		showRemarkInRepoStargazersPage(userToken);
 	}
 }
 
 function showRemarkInOrgPeople(userToken){
-    var users = document.querySelectorAll('a[data-hovercard-type=user][id]');
-    if(!!users){
-        users.forEach(function (element) {
-            clearRemarkOfCurrentNode(element.parentNode);
-            var username = getMasterOfPage(element.href);
-            getRemark(userToken, username, function (remark) {
-                insertAfter(generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark), element);
-            });
+	var users = document.querySelectorAll('a[data-hovercard-type="user"]');
+	if(!!users){
+		users.forEach(function (element) {
+			if (element.querySelector('img') || (element.childElementCount > 0 && !element.textContent.trim())) return;
+			clearRemarkOfCurrentNode(element.parentNode);
+			var username = getMasterOfPage(element.href);
+			if(!username) return;
+			getRemark(userToken, username, function (remark) {
+				insertAfter(generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark), element);
+			});
 		}, this)
-    }
+	}
 }
 
 function showRemarkInOrgMembers(userToken){
-    var users = document.querySelectorAll('ul.member-listing > li > div > a[data-hovercard-type=user]');
-    if(!!users){
-        users.forEach(function (element) {
-            clearRemarkOfCurrentNode(element.parentNode);
-            var username = getMasterOfPage(element.href);
-            getRemark(userToken, username, function (remark) {
-                insertAfter(generateRemarkSpan('link-gray pl-1 github-remarks', userToken, username, remark), element);
-            });
-		}, this)
-    }
+	showRemarkInOrgPeople(userToken);
 }
 
 function changeRemarks(userToken, username, oldValue) {

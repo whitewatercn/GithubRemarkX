@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "GithubRemark",
-  "version": "0.5.6",
-  "description": "给你的Github好友增加备注名吧～",
+  "name": "GithubRemarkX",
+  "version": "0.5.7",
+  "description": "给你的Github设置备注，并且支持云端同步",
   "icons": {
     "128": "images/github_512.png"
   },
@@ -15,7 +15,8 @@
     "storage"
   ],
   "host_permissions": [
-    "*://*.github.com/*"
+    "*://*.github.com/*",
+    "<all_urls>"
   ],
   "action": {
     "default_title": "GithubRemark",

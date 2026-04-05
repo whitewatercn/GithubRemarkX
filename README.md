@@ -1,3 +1,5 @@
+本项目基于 https://github.com/dpy1123/GithubRemark 进一步开发
+
 # GithubRemark
 这是一个chrome插件，用于扩展Github的交友能力～  
 虽然Github有name和username，但是还缺少像微信那样的备注名功能。此功能的缺失，对于现在二次元化的g友间的沟通和交往十分不利，因此本扩展应运而生～
