@@ -81,21 +81,17 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 	document.getElementById('exportLocal').onclick = function() {
 		chrome.runtime.sendMessage({ method: 'getAllRemarks' }, function(response) {
-			chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(res) {
-				var exportData = {
-					webdavUrl: res.webdavUrl || '',
-					webdavUser: res.webdavUser || '',
-					webdavPass: res.webdavPass || '',
-					remarks: response.remarks || {}
-				};
-				var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-				var url = URL.createObjectURL(blob);
-				var a = document.createElement('a');
-				a.href = url;
-				a.download = 'github_remarks_export.json';
-				a.click();
-				URL.revokeObjectURL(url);
-			});
+			var exportData = response.remarks || {};
+			var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+			var url = URL.createObjectURL(blob);
+			var a = document.createElement('a');
+			a.href = url;
+			var d = new Date();
+			var pad = function(n) { return n < 10 ? '0' + n : n; };
+			var dateStr = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + '-' + pad(d.getMinutes());
+			a.download = dateStr + '-backup.json';
+			a.click();
+			URL.revokeObjectURL(url);
 		});
 	};
 
@@ -119,6 +115,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 						webdavUser: data.webdavUser || '',
 						webdavPass: data.webdavPass || ''
 					});
+				}
+				if (remarksToUpdate === data) {
+					delete remarksToUpdate.webdavUrl;
+					delete remarksToUpdate.webdavUser;
+					delete remarksToUpdate.webdavPass;
 				}
 				chrome.runtime.sendMessage({ method: 'updateAllRemarks', remarks: remarksToUpdate }, function(res) {
 					if (res && res.success) {

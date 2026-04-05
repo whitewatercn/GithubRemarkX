@@ -41,6 +41,9 @@ function _getDavUrls(base) {
         dirPath = lastSlash !== -1 ? base.substring(0, lastSlash + 1) : base + '/';
         fileUrl = base;
     } else {
+        if (!base.toLowerCase().endsWith('githubremarkx')) {
+            base += '/githubremarkX';
+        }
         dirPath = base + '/';
         var d = new Date();
         var pad = function(n) { return n < 10 ? '0' + n : n; };

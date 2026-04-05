@@ -65,20 +65,17 @@
 
 
 document.querySelector('#exportBtn').onclick = function () {
-                var config = {
-                        webdavUrl: document.querySelector('#webdavUrl').value,
-                        webdavUser: document.querySelector('#webdavUser').value,
-                        webdavPass: document.querySelector('#webdavPass').value
-                };
-
                 chrome.runtime.sendMessage({ method: 'getAllRemarks' }, function(response) {
-                        config.remarks = response.remarks || {};
-                        var jsonStr = JSON.stringify(config, null, 2);
+                        var exportData = response.remarks || {};
+                        var jsonStr = JSON.stringify(exportData, null, 2);
                         var blob = new Blob([jsonStr], { type: "application/json" });
                         var url = URL.createObjectURL(blob);
                         var a = document.createElement('a');
                         a.href = url;
-                        a.download = "github_remark_config.json";
+                        var d = new Date();
+                        var pad = function(n) { return n < 10 ? '0' + n : n; };
+                        var dateStr = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + '-' + pad(d.getMinutes());
+                        a.download = dateStr + "-backup.json";
                         a.click();
                         URL.revokeObjectURL(url);
                 });
@@ -100,23 +97,28 @@ document.querySelector('#exportBtn').onclick = function () {
                                         document.querySelector('#webdavUser').value = config.webdavUser || '';
                                         document.querySelector('#webdavPass').value = config.webdavPass || '';
                                         document.querySelector('#save').click();
-                                        
-                                        if (config.remarks && Object.keys(config.remarks).length > 0) {
-                                            chrome.runtime.sendMessage({
-                                                method: 'updateAllRemarks',
-                                                remarks: config.remarks
-                                            }, function(res) {
-                                                if(res.success) {
-                                                    alert(I18N.getMessage('importAllSuccess', [Object.keys(config.remarks).length]));
-                                                } else {
-                                                    alert(I18N.getMessage('importConfigSuccessUploadFailed', [res.error && res.error.startsWith('uploadFailedStatus|') ? I18N.getMessage('uploadFailedStatus', [res.error.split('|')[1]]) : (res.error === 'notConfigured' ? I18N.getMessage('notConfigured') : res.error)]));
-                                                }
-                                            });
+                                }
+                                
+                                var remarksData = config.remarks ? config.remarks : config;
+                                if (remarksData === config) {
+                                        delete remarksData.webdavUrl;
+                                        delete remarksData.webdavUser;
+                                        delete remarksData.webdavPass;
+                                }
+
+                                if (Object.keys(remarksData).length > 0) {
+                                    chrome.runtime.sendMessage({
+                                        method: 'updateAllRemarks',
+                                        remarks: remarksData
+                                    }, function(res) {
+                                        if(res && res.success) {
+                                            alert(I18N.getMessage('importAllSuccess', [Object.keys(remarksData).length]));
                                         } else {
-                                            alert(I18N.getMessage('importConfigSuccessNoData'));
+                                            alert(I18N.getMessage('importConfigSuccessUploadFailed', [res.error && res.error.startsWith('uploadFailedStatus|') ? I18N.getMessage('uploadFailedStatus', [res.error.split('|')[1]]) : (res.error === 'notConfigured' ? I18N.getMessage('notConfigured') : res.error)]));
                                         }
+                                    });
                                 } else {
-                                        alert(I18N.getMessage('importFailedNotJson'));
+                                    alert(I18N.getMessage('importConfigSuccessNoData'));
                                 }
                         } catch (err) {
                                 alert(I18N.getMessage('parseFailed', [err.message]));
