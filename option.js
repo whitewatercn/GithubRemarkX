@@ -9,62 +9,9 @@
         }
     }
 
-	chrome.storage.local.get(['webdavUrl', 'webdavUser', 'webdavPass'], function(result) {
-		if (result.webdavUrl) document.querySelector('#webdavUrl').value = result.webdavUrl;
-		if (result.webdavUser) document.querySelector('#webdavUser').value = result.webdavUser;
-		if (result.webdavPass) document.querySelector('#webdavPass').value = result.webdavPass;
-	});
+	
 
-	document.querySelector('#save').onclick = function () {
-		var url = document.querySelector('#webdavUrl').value;
-		var user = document.querySelector('#webdavUser').value;
-		var pass = document.querySelector('#webdavPass').value;
-		
-		chrome.storage.local.set({
-			webdavUrl: url,
-			webdavUser: user,
-			webdavPass: pass
-		}, function() {
-			var status = document.querySelector('#saveStatus');
-			status.style.display = 'inline';
-			setTimeout(function() { status.style.display = 'none'; }, 2000);
-		});
-	};
-
-
-        document.querySelector('#testConn').onclick = function () {
-                var url = document.querySelector('#webdavUrl').value;
-                var user = document.querySelector('#webdavUser').value;
-                var pass = document.querySelector('#webdavPass').value;
-
-                if (!url || !user || !pass) {
-                        alert(I18N.getMessage('fillCompleteInfo'));
-                        return;
-                }
-
-                var status = document.querySelector('#testStatus');
-                status.textContent = I18N.getMessage('testingConn');
-                status.style.color = '#31708f';
-                status.style.display = 'inline';
-
-                chrome.runtime.sendMessage({
-                        method: 'testWebDav',
-                        url: url,
-                        user: user,
-                        pass: pass
-                }, function(response) {
-                        if (response.success) {
-                                status.textContent = I18N.getMessage('connSuccess');
-                                status.style.color = '#3c763d';
-                        } else {
-                                status.textContent = I18N.getMessage('connFailed', [(response.error || I18N.getMessage('unknownError'))]);
-                                status.style.color = '#a94442';
-                        }
-                });
-        };
-
-
-document.querySelector('#exportBtn').onclick = function () {
+	document.querySelector('#exportBtn').onclick = function () {
                 chrome.runtime.sendMessage({ method: 'getAllRemarks' }, function(response) {
                         var exportData = response.remarks || {};
                         var jsonStr = JSON.stringify(exportData, null, 2);
@@ -92,12 +39,7 @@ document.querySelector('#exportBtn').onclick = function () {
                 reader.onload = function (e) {
                         try {
                                 var config = JSON.parse(e.target.result);
-                                if (config.webdavUrl || config.webdavUser) {
-                                        document.querySelector('#webdavUrl').value = config.webdavUrl || '';
-                                        document.querySelector('#webdavUser').value = config.webdavUser || '';
-                                        document.querySelector('#webdavPass').value = config.webdavPass || '';
-                                        document.querySelector('#save').click();
-                                }
+                                
                                 
                                 var remarksData = config.remarks ? config.remarks : config;
                                 if (remarksData === config) {
