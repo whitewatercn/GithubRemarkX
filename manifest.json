@@ -16,11 +16,11 @@
     {
       "matches": ["*://*.github.com/*"],
       "js": [
-        "i18n.js",
-        "content_scripts/api.js",
-        "content_scripts/utils.js",
-        "content_scripts/features.js",
-        "content_scripts/main.js"
+        "src/utils/i18n.js",
+        "src/content/api.js",
+        "src/content/utils.js",
+        "src/content/features.js",
+        "src/content/main.js"
       ],
       "run_at": "document_idle"
     }
@@ -45,11 +45,11 @@
     "default_icon": {
       "19": "images/github.png"
     },
-    "default_popup": "popup.html"
+    "default_popup": "src/popup/popup.html"
   },
   "options_ui": {
-    "page": "options.html",
+    "page": "src/options/options.html",
     "open_in_tab": true
   },
-  "devtools_page": "options.html"
+  "devtools_page": "src/options/options.html"
 }
