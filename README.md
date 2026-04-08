@@ -1,4 +1,8 @@
-# GithubRemarkX
+经提醒，这个项目已经覆盖了本项目的功能，可以直接用⬇️，本项目已停止更新
+
+utags/utags: 🏷️ Allow users to add custom tags to links.: https://github.com/utags/utags
+
+# GithubRemarkX（停止更新）
 
 本项目基于 https://github.com/dpy1123/GithubRemark 进一步开发
 
